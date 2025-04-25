@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"xorm.io/core"
+	"github.com/grafana/grafana/pkg/infra/log"
 )
 
 const (
