@@ -14,6 +14,7 @@ import (
 	"runtime"
 	"sync"
 	"time"
+	"dm"
 
 	"xorm.io/core"
 
@@ -32,7 +33,7 @@ func regDrvsNDialects() bool {
 		getDialect func() core.Dialect
 	}{
 		"mssql":    {"mssql", func() core.Driver { return &odbcDriver{} }, func() core.Dialect { return &mssql{} }},
-		"odbc":     {"mssql", func() core.Driver { return &odbcDriver{} }, func() core.Dialect { return &mssql{} }}, // !nashtsai! TODO change this when supporting MS Access
+		"odbc":     {"odbc", func() core.Driver { return &odbcDriver{} }, func() core.Dialect { return &dm{} }}, // !nashtsai! TODO change this when supporting MS Access
 		"mysql":    {"mysql", func() core.Driver { return &mysqlDriver{} }, func() core.Dialect { return &mysql{} }},
 		"mymysql":  {"mysql", func() core.Driver { return &mymysqlDriver{} }, func() core.Dialect { return &mysql{} }},
 		"postgres": {"postgres", func() core.Driver { return &pqDriver{} }, func() core.Dialect { return &postgres{} }},
@@ -41,6 +42,8 @@ func regDrvsNDialects() bool {
 		"oci8":     {"oracle", func() core.Driver { return &oci8Driver{} }, func() core.Dialect { return &oracle{} }},
 		"goracle":  {"oracle", func() core.Driver { return &goracleDriver{} }, func() core.Dialect { return &oracle{} }},
 	}
+
+	currentLog := log.New("xorm")
 
 	for driverName, v := range providedDrvsNDialects {
 		if driver := core.QueryDriver(driverName); driver == nil {
