@@ -72,8 +72,8 @@ func NewEngine(driverName string, dataSourceName string) (*Engine, error) {
 	if err != nil {
 		return nil, err
 	}
-	currentLog.Warn("[DB] Database uri: " + uri)
-	currentLog.Warn("[DB] Database type: " + uri.DbType)
+	currentLog.Warn("[DB] Database uri: %s", uri.String())
+	currentLog.Warn("[DB] Database type: %s", uri.DbType)
 	dialect := core.QueryDialect(uri.DbType)
 	currentLog.Warn("[DB] Dialect: ", dialect)
 	if dialect == nil {
