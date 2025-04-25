@@ -60,6 +60,8 @@ func init() {
 // NewEngine new a db manager according to the parameter. Currently support four
 // drivers
 func NewEngine(driverName string, dataSourceName string) (*Engine, error) {
+	currentLog := log.New("xorm")
+
 	driver := core.QueryDriver(driverName)
 	if driver == nil {
 		return nil, fmt.Errorf("Unsupported driver name: %v", driverName)
@@ -69,8 +71,10 @@ func NewEngine(driverName string, dataSourceName string) (*Engine, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	currentLog.Warn("[DB] Database uri: " + uri)
+	currentLog.Warn("[DB] Database type: " + uri.DbType)
 	dialect := core.QueryDialect(uri.DbType)
+	currentLog.Warn("[DB] Dialect: ", dialect)
 	if dialect == nil {
 		return nil, fmt.Errorf("Unsupported dialect type: %v", uri.DbType)
 	}
