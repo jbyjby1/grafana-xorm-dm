@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"xorm.io/core"
+	"github.com/grafana/grafana/pkg/infra/log"
 )
 
 var (
@@ -163,6 +164,7 @@ var (
 type dm struct {
 	core.Base
 	rowFormat string
+	currentLog log.Logger
 }
 
 func (db *dm) Init(d *core.DB, uri *core.Uri, drivername, dataSourceName string) error {
@@ -575,6 +577,8 @@ func (db *dm) CreateTableSql(table *core.Table, tableName, storeEngine, charset 
 		tableName = table.Name
 	}
 
+	dm.logger.Warn("[DIALECT_DM]Start to generate create table sql: current sql: ", sql)
+
 	sql += db.Quote(tableName)
 	sql += " ("
 
@@ -582,12 +586,19 @@ func (db *dm) CreateTableSql(table *core.Table, tableName, storeEngine, charset 
 		pkList := table.PrimaryKeys
 
 		for _, colName := range table.ColumnsSeq() {
+			dm.logger.Warn("[DIALECT_DM]Start to parse column : ", colName)
 			col := table.GetColumn(colName)
 			if col.IsPrimaryKey && len(pkList) == 1 {
-				sql += col.String(db)
+				dm.logger.Warn("[DIALECT_DM]Column is primary key : ", colName)
+				currentCol := col.String(db)
+				dm.logger.Warn("[DIALECT_DM]Current column sql : ", currentCol)
+				sql += currentCol
 			} else {
-				sql += col.StringNoPk(db)
+				currentCol := col.StringNoPk(db)
+				dm.logger.Warn("[DIALECT_DM]Current column sql : ", currentCol)
+				sql += currentCol
 			}
+
 			sql = strings.TrimSpace(sql)
 			// if len(col.Comment) > 0 {
 			// 	sql += " COMMENT '" + col.Comment + "'"
@@ -606,6 +617,8 @@ func (db *dm) CreateTableSql(table *core.Table, tableName, storeEngine, charset 
 	sql += ")"
 
 	sql += " STORAGE (on CLOUD_MONITOR)"
+
+	dm.logger.Warn("[DIALECT_DM]Create table final sql : ", sql)
 
 	// if storeEngine != "" {
 	// 	sql += " ENGINE=" + storeEngine
