@@ -73,7 +73,9 @@ func NewEngine(driverName string, dataSourceName string) (*Engine, error) {
 		return nil, fmt.Errorf("Unsupported driver name: %v", driverName)
 	}
 
-	currentLog.Warn("[DB] Database driver name: %s   dataSourceName: %s", driverName, dataSourceName)
+	currentLog.Warn("[DB] Database driver name: ", driverName)
+	currentLog.Warn("[DB] Database driver dataSourceName: ", dataSourceName)
+
 	uri, err := driver.Parse(driverName, dataSourceName)
 	if err != nil {
 		return nil, err
@@ -82,6 +84,70 @@ func NewEngine(driverName string, dataSourceName string) (*Engine, error) {
 	currentLog.Warn("[DB] Database type: %s", uri.DbType)
 	dialect := core.QueryDialect(uri.DbType)
 	currentLog.Warn("[DB] Dialect: ", dialect)
+
+	if dialect == nil {
+		return nil, fmt.Errorf("Unsupported dialect type: %v", uri.DbType)
+	}
+
+	db, err := core.Open(driverName, dataSourceName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = dialect.Init(db, uri, driverName, dataSourceName)
+	if err != nil {
+		return nil, err
+	}
+
+	engine := &Engine{
+		db:             db,
+		dialect:        dialect,
+		Tables:         make(map[reflect.Type]*core.Table),
+		mutex:          &sync.RWMutex{},
+		TagIdentifier:  "xorm",
+		TZLocation:     time.Local,
+		tagHandlers:    defaultTagHandlers,
+		cachers:        make(map[string]core.Cacher),
+		defaultContext: context.Background(),
+	}
+
+	if uri.DbType == core.SQLITE {
+		engine.DatabaseTZ = time.UTC
+	} else {
+		engine.DatabaseTZ = time.Local
+	}
+
+	logger := NewSimpleLogger(os.Stdout)
+	logger.SetLevel(core.LOG_INFO)
+	engine.SetLogger(logger)
+	engine.SetMapper(core.NewCacheMapper(new(core.SnakeMapper)))
+
+	runtime.SetFinalizer(engine, close)
+
+	return engine, nil
+}
+
+// NewEngineWithParams new a db manager with params. The params will be passed to dialect.
+func NewEngineWithDialect(driverName string, dataSourceName string, dialect core.Dialect) (*Engine, error) {
+	currentLog := log.New("xorm")
+
+	driver := core.QueryDriver(driverName)
+	if driver == nil {
+		return nil, fmt.Errorf("Unsupported driver name: %v", driverName)
+	}
+
+	currentLog.Warn("[DB] Database driver name: ", driverName)
+	currentLog.Warn("[DB] Database driver dataSourceName: ", dataSourceName)
+
+	uri, err := driver.Parse(driverName, dataSourceName)
+	if err != nil {
+		return nil, err
+	}
+	currentLog.Warn("[DB] Database uri: %s", uri)
+	currentLog.Warn("[DB] Database type: %s", uri.DbType)
+	//dialect := core.QueryDialect(uri.DbType)
+	currentLog.Warn("[DB] Dialect: ", dialect)
+
 	if dialect == nil {
 		return nil, fmt.Errorf("Unsupported dialect type: %v", uri.DbType)
 	}
