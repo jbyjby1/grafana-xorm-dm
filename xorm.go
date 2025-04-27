@@ -128,13 +128,15 @@ func NewEngine(driverName string, dataSourceName string) (*Engine, error) {
 }
 
 // NewEngineWithParams new a db manager with params. The params will be passed to dialect.
-func NewEngineWithDialect(driverName string, dataSourceName string, dialect core.Dialect) (*Engine, error) {
+func NewEngineForDm(driverName string, dataSourceName string) (*Engine, error) {
 	currentLog := log.New("xorm")
 
-	driver := core.QueryDriver(driverName)
-	if driver == nil {
-		return nil, fmt.Errorf("Unsupported driver name: %v", driverName)
-	}
+	// driver := core.QueryDriver(driverName)
+	// if driver == nil {
+	// 	return nil, fmt.Errorf("Unsupported driver name: %v", driverName)
+	// }
+
+	driver := &odbcDriver{}
 
 	currentLog.Warn("[DB] Database driver name: ", driverName)
 	currentLog.Warn("[DB] Database driver dataSourceName: ", dataSourceName)
@@ -146,6 +148,7 @@ func NewEngineWithDialect(driverName string, dataSourceName string, dialect core
 	currentLog.Warn("[DB] Database uri: %s", uri)
 	currentLog.Warn("[DB] Database type: %s", uri.DbType)
 	//dialect := core.QueryDialect(uri.DbType)
+	dialect := &dm{}
 	currentLog.Warn("[DB] Dialect: ", dialect)
 
 	if dialect == nil {
