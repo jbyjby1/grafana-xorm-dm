@@ -42,9 +42,13 @@ func regDrvsNDialects() bool {
 		"goracle":  {"oracle", func() core.Driver { return &goracleDriver{} }, func() core.Dialect { return &oracle{} }},
 	}
 
+	currentLog := log.New("xorm")
+
 	for driverName, v := range providedDrvsNDialects {
 		if driver := core.QueryDriver(driverName); driver == nil {
+			currentLog.Warn("[REGISTER] Register driver: %s, %s", driverName, v.getDriver())
 			core.RegisterDriver(driverName, v.getDriver())
+			currentLog.Warn("[REGISTER] Register dialect: %s, %s", v.dbType, v.getDialect())
 			core.RegisterDialect(v.dbType, v.getDialect)
 		}
 	}
@@ -69,6 +73,7 @@ func NewEngine(driverName string, dataSourceName string) (*Engine, error) {
 		return nil, fmt.Errorf("Unsupported driver name: %v", driverName)
 	}
 
+	currentLog.Warn("[DB] Database driver name: %s   dataSourceName: %s", driverName, dataSourceName)
 	uri, err := driver.Parse(driverName, dataSourceName)
 	if err != nil {
 		return nil, err
