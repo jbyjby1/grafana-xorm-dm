@@ -42,8 +42,6 @@ func regDrvsNDialects() bool {
 		"goracle":  {"oracle", func() core.Driver { return &goracleDriver{} }, func() core.Dialect { return &oracle{} }},
 	}
 
-	currentLog := log.New("xorm")
-
 	for driverName, v := range providedDrvsNDialects {
 		if driver := core.QueryDriver(driverName); driver == nil {
 			core.RegisterDriver(driverName, v.getDriver())

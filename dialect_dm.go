@@ -632,7 +632,7 @@ type mydmDriver struct {
 }
 
 func (p *mydmDriver) Parse(driverName, dataSourceName string) (*core.Uri, error) {
-	db := &core.Uri{DbType: core.DM}
+	db := &core.Uri{DbType: core.odbc}
 
 	pd := strings.SplitN(dataSourceName, "*", 2)
 	if len(pd) == 2 {
@@ -692,7 +692,7 @@ func (p *dmDriver) Parse(driverName, dataSourceName string) (*core.Uri, error) {
 	matches := dsnPattern.FindStringSubmatch(dataSourceName)
 	names := dsnPattern.SubexpNames()
 
-	uri := &core.Uri{DbType: core.DM}
+	uri := &core.Uri{DbType: core.odbc}
 
 	for i, match := range matches {
 		switch names[i] {
