@@ -148,9 +148,7 @@ func NewEngineForDm(driverName string, dataSourceName string) (*Engine, error) {
 	currentLog.Warn("[DB] Database uri: %s", uri)
 	currentLog.Warn("[DB] Database type: %s", uri.DbType)
 	//dialect := core.QueryDialect(uri.DbType)
-	dialect := &dm{
-		logger: log.New("dialect_dm"),
-	}
+	dialect := &dm{}
 	currentLog.Warn("[DB] Dialect: ", dialect)
 
 	if dialect == nil {

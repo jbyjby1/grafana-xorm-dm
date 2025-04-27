@@ -164,7 +164,6 @@ var (
 type dm struct {
 	core.Base
 	rowFormat string
-	logger log.Logger
 }
 
 func (db *dm) Init(d *core.DB, uri *core.Uri, drivername, dataSourceName string) error {
@@ -577,7 +576,9 @@ func (db *dm) CreateTableSql(table *core.Table, tableName, storeEngine, charset 
 		tableName = table.Name
 	}
 
-	dm.logger.Warn("[DIALECT_DM]Start to generate create table sql: current sql: ", sql)
+	currentLog := log.New("dialect_dm")
+
+	currentLog.Warn("[DIALECT_DM]Start to generate create table sql: current sql: ", sql)
 
 	sql += db.Quote(tableName)
 	sql += " ("
@@ -586,16 +587,16 @@ func (db *dm) CreateTableSql(table *core.Table, tableName, storeEngine, charset 
 		pkList := table.PrimaryKeys
 
 		for _, colName := range table.ColumnsSeq() {
-			dm.logger.Warn("[DIALECT_DM]Start to parse column : ", colName)
+			currentLog.Warn("[DIALECT_DM]Start to parse column : ", colName)
 			col := table.GetColumn(colName)
 			if col.IsPrimaryKey && len(pkList) == 1 {
-				dm.logger.Warn("[DIALECT_DM]Column is primary key : ", colName)
+				currentLog.Warn("[DIALECT_DM]Column is primary key : ", colName)
 				currentCol := col.String(db)
-				dm.logger.Warn("[DIALECT_DM]Current column sql : ", currentCol)
+				currentLog.Warn("[DIALECT_DM]Current column sql : ", currentCol)
 				sql += currentCol
 			} else {
 				currentCol := col.StringNoPk(db)
-				dm.logger.Warn("[DIALECT_DM]Current column sql : ", currentCol)
+				currentLog.Warn("[DIALECT_DM]Current column sql : ", currentCol)
 				sql += currentCol
 			}
 
@@ -618,7 +619,7 @@ func (db *dm) CreateTableSql(table *core.Table, tableName, storeEngine, charset 
 
 	sql += " STORAGE (on CLOUD_MONITOR)"
 
-	dm.logger.Warn("[DIALECT_DM]Create table final sql : ", sql)
+	currentLog.Warn("[DIALECT_DM]Create table final sql : ", sql)
 
 	// if storeEngine != "" {
 	// 	sql += " ENGINE=" + storeEngine
