@@ -164,11 +164,11 @@ var (
 type dm struct {
 	core.Base
 	rowFormat string
-	currentLog log.Logger
+	logger log.Logger
 }
 
 func (db *dm) Init(d *core.DB, uri *core.Uri, drivername, dataSourceName string) error {
-	return db.Base.Init(d, db, uri, drivername, dataSourceName) 
+	return db.Base.Init(d, db, uri, drivername, dataSourceName)
 }
 
 func (db *dm) SetParams(params map[string]string) {
