@@ -266,7 +266,7 @@ func (db *dm) IsReserved(name string) bool {
 }
 
 func (db *dm) Quote(name string) string {
-	return "`" + name + "`"
+	return "\"" + name + "\""
 }
 
 func (db *dm) SupportEngine() bool {
@@ -687,7 +687,17 @@ func (p *mydmDriver) Parse(driverName, dataSourceName string) (*core.Uri, error)
 	if len(dup) != 3 {
 		return nil, errors.New("wrong database part of URI")
 	}
-	db.DbName = dup[0]
+
+	currentLog := log.New("dialect_dm")
+
+	currentLog.WARN("Set db name for : ", dup[0])
+	if dup[0] == "DM8" {
+		currentLog.WARN("Set db name to : CLOUD_MONITOR")
+		db.DbName = "CLOUD_MONITOR"
+	}else{
+		currentLog.WARN("Set db name to : ", dup[0])
+		db.DbName = dup[0]
+	}
 	db.User = dup[1]
 	db.Passwd = dup[2]
 
