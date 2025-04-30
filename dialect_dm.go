@@ -690,12 +690,12 @@ func (p *mydmDriver) Parse(driverName, dataSourceName string) (*core.Uri, error)
 
 	currentLog := log.New("dialect_dm")
 
-	currentLog.WARN("Set db name for : ", dup[0])
+	currentLog.Warn("[xorm]Set db name for : ", dup[0])
 	if dup[0] == "DM8" {
-		currentLog.WARN("Set db name to : CLOUD_MONITOR")
+		currentLog.Warn("[xorm]Set db name to : CLOUD_MONITOR")
 		db.DbName = "CLOUD_MONITOR"
 	}else{
-		currentLog.WARN("Set db name to : ", dup[0])
+		currentLog.Warn("[xorm]Set db name to : ", dup[0])
 		db.DbName = dup[0]
 	}
 	db.User = dup[1]
