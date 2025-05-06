@@ -187,6 +187,8 @@ func NewEngineForDm(driverName string, dataSourceName string) (*Engine, error) {
 	logger.SetLevel(core.LOG_INFO)
 	engine.SetLogger(logger)
 	engine.SetMapper(core.NewCacheMapper(new(core.SnakeMapper)))
+	prefixedMapper := PrefixedSnakeMapper{prefix: "CLOUD_MONITOR."}
+	engine.SetTableMapper(prefixedMapper)
 
 	runtime.SetFinalizer(engine, close)
 
