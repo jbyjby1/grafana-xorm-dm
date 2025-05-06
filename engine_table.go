@@ -10,17 +10,23 @@ import (
 	"strings"
 
 	"xorm.io/core"
+	"github.com/grafana/grafana/pkg/infra/log"
 )
 
 // tbNameWithSchema will automatically add schema prefix on table name
 func (engine *Engine) tbNameWithSchema(v string) string {
+	currentLog := log.New("engine_table")
 	// Add schema name as prefix of table name.
 	// Only for postgres database.
+	currentLog.Warn("[Engine Table]generate table name with schema: ", v)
 	if engine.dialect.DBType() == core.POSTGRES &&
 		engine.dialect.URI().Schema != "" &&
 		engine.dialect.URI().Schema != postgresPublicSchema &&
 		strings.Index(v, ".") == -1 {
 		return engine.dialect.URI().Schema + "." + v
+	} else if engine.dialect.DBType() == "odbc" {
+		currentLog.Warn("[Engine Table]DM table name with schema: ", "CLOUD_MONITOR." + v)
+		return "CLOUD_MONITOR." + v
 	}
 	return v
 }
@@ -36,6 +42,9 @@ func isSubQuery(tbName string) bool {
 
 // TableName returns table name with schema prefix if has
 func (engine *Engine) TableName(bean interface{}, includeSchema ...bool) string {
+	currentLog := log.New("engine_table")
+	currentLog.Warn("[Engine Table]Start to get table name for bean: ", bean)
+	currentLog.Warn("[Engine Table]Start to get table name for include schema: ", includeSchema)
 	tbName := engine.tbNameNoSchema(bean)
 	if len(includeSchema) > 0 && includeSchema[0] && !isSubQuery(tbName) {
 		tbName = engine.tbNameWithSchema(tbName)
