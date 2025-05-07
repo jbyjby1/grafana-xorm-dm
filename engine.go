@@ -22,6 +22,7 @@ import (
 
 	"xorm.io/builder"
 	"xorm.io/core"
+	"github.com/grafana/grafana/pkg/infra/log"
 )
 
 // Engine is the major struct of xorm, it means a database manager.
@@ -262,7 +263,10 @@ func quoteTo(buf *strings.Builder, quotePair string, value string) {
 }
 
 func (engine *Engine) quote(sql string) string {
-	return engine.dialect.Quote(sql)
+	currentLogger := log.New("session")
+	result := engine.dialect.Quote(sql)
+	currentLogger.Warn("[Sql quote] Quote sql :", sql, result, engine.dialect)
+	return result
 }
 
 // SqlType will be deprecated, please use SQLType instead
