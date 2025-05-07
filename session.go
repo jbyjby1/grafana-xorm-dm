@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"xorm.io/core"
+	"github.com/grafana/grafana/pkg/infra/log"
 )
 
 type sessionType int
@@ -94,6 +95,11 @@ func (session *Session) Init() {
 	session.lastSQLArgs = []interface{}{}
 
 	session.ctx = session.engine.defaultContext
+
+	currentLogger := log.New("session")
+	currentLogger.Warn("[Xorm Session init] Start to init session. Set schema to CLOUD_MONITOR.")
+
+	session.DB().ExecContext(session.ctx, "SET SCHEMA CLOUD_MONITOR;")
 }
 
 // Close release the connection from pool
