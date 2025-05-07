@@ -392,6 +392,7 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 
 		currentLogger := log.New("session_insert")
 		currentLogger.Warn("[Xorm Session insert] Start to write strings for column names.")
+		currentLogger.Warn("[Xorm Session insert] Session dialect: ", session.engine.dialect.DBType())
 
 		if session.engine.dialect.DBType() == "odbc" {
 			currentLogger.Warn("[Xorm Session insert] Write strings for column names for DM DBMS.")
