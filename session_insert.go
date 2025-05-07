@@ -14,6 +14,7 @@ import (
 
 	"xorm.io/builder"
 	"xorm.io/core"
+	"github.com/grafana/grafana/pkg/infra/log"
 )
 
 // ErrNoElementsOnSlice represents an error there is no element when insert
@@ -259,6 +260,13 @@ func (session *Session) innerInsertMulti(rowsSlicePtr interface{}) (int64, error
 			session.engine.Quote(tableName),
 			quoteColumns(colNames, session.engine.Quote, ","),
 			strings.Join(colMultiPlaces, temp))
+	} else if session.engine.dialect.DBType() == "odbc" {
+		currentLogger := log.New("session_insert")
+		currentLogger.Warn("[Xorm Session insert] Start to multi insert for dm dbms.")
+		sql = fmt.Sprintf("INSERT INTO %s (%v) VALUES (%v)",
+			session.engine.Quote(tableName),
+			quoteColumns(colNames, session.engine.Quote, ","),
+			strings.Join(colMultiPlaces, "),("))
 	} else {
 		sql = fmt.Sprintf("INSERT INTO %s (%v) VALUES (%v)",
 			session.engine.Quote(tableName),
@@ -382,9 +390,21 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 			return 0, err
 		}
 
-		if err := writeStrings(buf, append(colNames, exprs.colNames...), "`", "`"); err != nil {
-			return 0, err
+		currentLogger := log.New("session_insert")
+		currentLogger.Warn("[Xorm Session insert] Start to write strings for column names.")
+
+		if session.engine.dialect.DBType() == "odbc" {
+			currentLogger.Warn("[Xorm Session insert] Write strings for column names for DM DBMS.")
+			if err := writeStrings(buf, append(colNames, exprs.colNames...), "\"", "\""); err != nil {
+				return 0, err
+			}
+		} else {
+			if err := writeStrings(buf, append(colNames, exprs.colNames...), "`", "`"); err != nil {
+				return 0, err
+			}
 		}
+
+
 
 		if session.statement.cond.IsValid() {
 			if _, err := buf.WriteString(fmt.Sprintf(")%s SELECT ", output)); err != nil {
@@ -707,6 +727,8 @@ func (session *Session) genInsertColumns(bean interface{}) ([]string, []interfac
 
 		colNames = append(colNames, col.Name)
 	}
+	currentLogger := log.New("session_insert")
+	currentLogger.Warn("[Xorm Session insert] Start to gen column names: ", colNames)
 	return colNames, args, nil
 }
 
