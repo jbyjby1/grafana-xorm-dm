@@ -31,8 +31,8 @@ func regDrvsNDialects() bool {
 		getDriver  func() core.Driver
 		getDialect func() core.Dialect
 	}{
-		"mssql":    {"mssql", func() core.Driver { return &odbcDriver{} }, func() core.Dialect { return &mssql{} }},
-		"odbc":     {"odbc", func() core.Driver { return &odbcDriver{} }, func() core.Dialect { return &dm{} }}, // !nashtsai! TODO change this when supporting MS Access
+		//"mssql":    {"mssql", func() core.Driver { return &odbcDriver{} }, func() core.Dialect { return &mssql{} }},
+		"odbc":     {"odbc", func() core.Driver { return &dmDriver{} }, func() core.Dialect { return &dm{} }}, // !nashtsai! TODO change this when supporting MS Access
 		"mysql":    {"mysql", func() core.Driver { return &mysqlDriver{} }, func() core.Dialect { return &mysql{} }},
 		"mymysql":  {"mysql", func() core.Driver { return &mymysqlDriver{} }, func() core.Dialect { return &mysql{} }},
 		"postgres": {"postgres", func() core.Driver { return &pqDriver{} }, func() core.Dialect { return &postgres{} }},
