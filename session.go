@@ -104,10 +104,14 @@ func (session *Session) Init() {
 	// 注册Before钩子
 	session.Before(func(bean interface{}) {
 		if stmt, ok := bean.(*Statement); ok {
-			originalSQL := stmt.SQL.String()
-			preparedSQL := strings.ReplaceAll(strings.ReplaceAll(originalSQL, "\n", " "), "\t", " ")
-			stmt.SQL.Reset() // 清空原有的SQL
-			stmt.SQL.WriteString(preparedSQL) // 设置新的SQL
+			originalSQL := stmt.LastSQL
+			processedSQL := strings.ReplaceAll(strings.ReplaceAll(originalSQL, "\n", " "), "\t", " ")
+			stmt.LastSQL = processedSQL
+
+			// originalSQL := stmt.SQL.String()
+			// preparedSQL := strings.ReplaceAll(strings.ReplaceAll(originalSQL, "\n", " "), "\t", " ")
+			// stmt.SQL.Reset() // 清空原有的SQL
+			// stmt.SQL.WriteString(preparedSQL) // 设置新的SQL
 		}
 	})
 
