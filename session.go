@@ -104,9 +104,12 @@ func (session *Session) Init() {
 	// 注册Before钩子
 	session.Before(func(bean interface{}) {
 		if stmt, ok := bean.(*Statement); ok {
-			originalSQL := stmt.LastSQL
+			currentLogger := log.New("Session_Before")
+			originalSQL := stmt.RawSQL
+			currentLogger.Warn("[Session Before]### Start to modify sql: ", originalSQL)
 			processedSQL := strings.ReplaceAll(strings.ReplaceAll(originalSQL, "\n", " "), "\t", " ")
-			stmt.LastSQL = processedSQL
+			currentLogger.Warn("[Session Before]### Modified sql: ", processedSQL)
+			stmt.RawSQL = processedSQL
 
 			// originalSQL := stmt.SQL.String()
 			// preparedSQL := strings.ReplaceAll(strings.ReplaceAll(originalSQL, "\n", " "), "\t", " ")
