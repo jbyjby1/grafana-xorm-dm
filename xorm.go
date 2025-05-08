@@ -190,6 +190,15 @@ func NewEngineForDm(driverName string, dataSourceName string) (*Engine, error) {
 	prefixedMapper := PrefixedSnakeMapper{prefix: "CLOUD_MONITOR."}
 	engine.SetTableMapper(prefixedMapper)
 
+	engine.Before(func(exec interface{}) {
+		if executor, ok := exec.(Executor); ok {
+			rawSQL := executor.GetSql()
+			modifiedSQL := strings.ReplaceAll(rawSQL, "\n", " ")
+			modifiedSQL = strings.ReplaceAll(modifiedSQL, "\t", " ")
+			executor.SetSql(modifiedSQL)
+		}
+	})
+
 	runtime.SetFinalizer(engine, close)
 
 	return engine, nil
