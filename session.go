@@ -100,7 +100,25 @@ func (session *Session) Init() {
 	currentLogger.Warn("[Xorm Session init] Start to init session. Set schema to CLOUD_MONITOR.")
 
 	session.DB().ExecContext(session.ctx, "SET SCHEMA CLOUD_MONITOR;")
+
+	// 注册Before钩子
+	session.Before(func(bean interface{}) {
+		if stmt, ok := bean.(*xorm.Statement); ok {
+			originalSQL := stmt.SQL.String()
+			preparedSQL := prepareSQL(originalSQL)
+			stmt.SQL.Reset() // 清空原有的SQL
+			stmt.SQL.WriteString(preparedSQL) // 设置新的SQL
+		}
+	})
+
 }
+
+// prepareSQL 在执行前对SQL进行预处理
+func (session *Session) prepareSQL(sql string) string {
+    // 将\n和\t替换为空格
+    return strings.ReplaceAll(strings.ReplaceAll(sql, "\n", " "), "\t", " ")
+}
+
 
 // Close release the connection from pool
 func (session *Session) Close() {
