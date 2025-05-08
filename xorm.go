@@ -136,7 +136,7 @@ func NewEngineForDm(driverName string, dataSourceName string) (*Engine, error) {
 	// 	return nil, fmt.Errorf("Unsupported driver name: %v", driverName)
 	// }
 
-	driver := &odbcDriver{}
+	driver := &dmDriver{}
 
 	currentLog.Warn("[DB] Database driver name: ", driverName)
 	currentLog.Warn("[DB] Database driver dataSourceName: ", dataSourceName)
