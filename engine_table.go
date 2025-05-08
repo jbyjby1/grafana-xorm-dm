@@ -25,10 +25,11 @@ func (engine *Engine) tbNameWithSchema(v string) string {
 		engine.dialect.URI().Schema != postgresPublicSchema &&
 		strings.Index(v, ".") == -1 {
 		return engine.dialect.URI().Schema + "." + v
-	} else if engine.dialect.DBType() == "odbc" {
-		//currentLog.Warn("[Engine Table]DM table name with schema: ", "CLOUD_MONITOR." + v)
-		return "CLOUD_MONITOR." + v
 	}
+	//  else if engine.dialect.DBType() == "odbc" {
+	// 	//currentLog.Warn("[Engine Table]DM table name with schema: ", "CLOUD_MONITOR." + v)
+	// 	return "CLOUD_MONITOR." + v
+	// }
 	return v
 }
 
