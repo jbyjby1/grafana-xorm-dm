@@ -572,8 +572,73 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 		aiValue.Set(int64ToIntValue(id, aiValue.Type()))
 
 		return 1, nil
-	} else {
+	} else if len(table.AutoIncrement) > 0 && (session.engine.dialect.DBType() == "odbc" {
+		// for DM DBMS, it didn't implement lastInsertId, so we should
+	    // implemented it ourself.
 		currentLogger.Warn("[CORE SQL INSERT]Tag1")
+		var sql string
+		var newArgs []interface{}
+		var needCommit bool
+		var id int64
+		if session.isAutoCommit { // if it's not in transaction
+			if err := session.Begin(); err != nil {
+				return 0, err
+			}
+			needCommit = true
+		}
+		_, err := session.exec(sqlStr, args...)
+		if err != nil {
+			return 0, err
+		}
+		i := utils.IndexSlice(colNames, table.AutoIncrement)
+		if i > -1 {
+			id, err = convert.AsInt64(args[i])
+			if err != nil {
+				return 0, err
+			}
+		} else {
+			sql = fmt.Sprintf("select %s.currval from dual", utils.SeqName(tableName))
+		}
+		currentLogger.Warn("[CORE SQL INSERT]last insert id A: ", id)
+		if id == 0 {
+			err := session.queryRow(sql, newArgs...).Scan(&id)
+			if err != nil {
+				return 0, err
+			}
+			if needCommit {
+				if err := session.Commit(); err != nil {
+					return 0, err
+				}
+			}
+			if id == 0 {
+				return 0, errors.New("insert successfully but not returned id")
+			}
+		}
+		currentLogger.Warn("[CORE SQL INSERT]last insert id B: ", id)
+
+		defer handleAfterInsertProcessorFunc(bean)
+
+		_ = session.cacheInsert(tableName)
+
+		if table.Version != "" && session.statement.checkVersion {
+			verValue, err := table.VersionColumn().ValueOf(bean)
+			if err != nil {
+				session.engine.logger.Errorf("%v", err)
+			} else if verValue.IsValid() && verValue.CanSet() {
+				session.incrVersionFieldValue(verValue)
+			}
+		}
+
+		aiValue, err := table.AutoIncrColumn().ValueOf(bean)
+		if err != nil {
+			session.engine.logger.Errorf("%v", err)
+		}
+
+		if aiValue == nil || !aiValue.IsValid() || !aiValue.CanSet() {
+			return 1, nil
+		}
+		return 1, convert.AssignValue(*aiValue, id)
+	} else {
 		res, err := session.exec(sqlStr, args...)
 		if err != nil {
 			return 0, err
@@ -598,7 +663,6 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 
 		var id int64
 		id, err = res.LastInsertId()
-		currentLogger.Warn("[CORE SQL INSERT]last insert id: ", id)
 		if err != nil || id <= 0 {
 			return res.RowsAffected()
 		}
