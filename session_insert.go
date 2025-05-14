@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 
+	"xorm.io/xorm/convert"
 	"xorm.io/builder"
 	"xorm.io/core"
 	"github.com/grafana/grafana/pkg/infra/log"
@@ -590,14 +591,22 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 		if err != nil {
 			return 0, err
 		}
-		i := utils.IndexSlice(colNames, table.AutoIncrement)
+
+		i := -1
+		for j, ss := range colNames {
+			if table.AutoIncrement == ss {
+				i = j
+			}
+		}
+
+		// i := utils.IndexSlice(colNames, table.AutoIncrement)
 		if i > -1 {
 			id, err = convert.AsInt64(args[i])
 			if err != nil {
 				return 0, err
 			}
 		} else {
-			sql = fmt.Sprintf("select %s.currval from dual", utils.SeqName(tableName))
+			sql = fmt.Sprintf("select %s.currval from dual", "SEQ_" + strings.ToUpper(tableName))
 		}
 		currentLogger.Warn("[CORE SQL INSERT]last insert id A: ", id)
 		if id == 0 {
