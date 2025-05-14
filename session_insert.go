@@ -334,6 +334,7 @@ func (session *Session) InsertMulti(rowsSlicePtr interface{}) (int64, error) {
 }
 
 func (session *Session) innerInsert(bean interface{}) (int64, error) {
+	currentLogger := log.New("session_insert")
 	if err := session.statement.setRefBean(bean); err != nil {
 		return 0, err
 	}
@@ -390,7 +391,6 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 			return 0, err
 		}
 
-		currentLogger := log.New("session_insert")
 		currentLogger.Warn("[Xorm Session insert] Start to write strings for column names.")
 		currentLogger.Warn("[Xorm Session insert] Session dialect: ", session.engine.dialect.DBType())
 
@@ -487,7 +487,7 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 		}
 		cleanupProcessorsClosures(&session.afterClosures) // cleanup after used
 	}
-
+	currentLogger.Warn("[CORE SQL INSERT]Tag0")
 	// for postgres, many of them didn't implement lastInsertId, so we should
 	// implemented it ourself.
 	if session.engine.dialect.DBType() == core.ORACLE && len(table.AutoIncrement) > 0 {
@@ -573,7 +573,7 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 
 		return 1, nil
 	} else {
-		session.engine.logger.Warn("[CORE SQL INSERT]Tag1")
+		currentLogger.Warn("[CORE SQL INSERT]Tag1")
 		res, err := session.exec(sqlStr, args...)
 		if err != nil {
 			return 0, err
@@ -598,7 +598,7 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 
 		var id int64
 		id, err = res.LastInsertId()
-		session.engine.logger.Warn("[CORE SQL INSERT]last insert id: ", id)
+		currentLogger.Warn("[CORE SQL INSERT]last insert id: ", id)
 		if err != nil || id <= 0 {
 			return res.RowsAffected()
 		}
