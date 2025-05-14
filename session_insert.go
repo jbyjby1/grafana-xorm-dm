@@ -572,7 +572,7 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 		aiValue.Set(int64ToIntValue(id, aiValue.Type()))
 
 		return 1, nil
-	} else if len(table.AutoIncrement) > 0 && (session.engine.dialect.DBType() == "odbc" {
+	} else if len(table.AutoIncrement) > 0 && session.engine.dialect.DBType() == "odbc" {
 		// for DM DBMS, it didn't implement lastInsertId, so we should
 	    // implemented it ourself.
 		currentLogger.Warn("[CORE SQL INSERT]Tag1")
