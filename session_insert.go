@@ -531,8 +531,7 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 		aiValue.Set(int64ToIntValue(id, aiValue.Type()))
 
 		return 1, nil
-	} else if len(table.AutoIncrement) > 0 && (session.engine.dialect.DBType() == core.POSTGRES || session.engine.dialect.DBType() == core.MSSQL || session.engine.dialect.DBType() == "odbc") {
-		session.engine.logger.Warn("[CORE SQL INSERT]Tag1")
+	} else if len(table.AutoIncrement) > 0 && (session.engine.dialect.DBType() == core.POSTGRES || session.engine.dialect.DBType() == core.MSSQL) {
 		res, err := session.queryBytes(sqlStr, args...)
 
 		if err != nil {
@@ -574,6 +573,7 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 
 		return 1, nil
 	} else {
+		session.engine.logger.Warn("[CORE SQL INSERT]Tag1")
 		res, err := session.exec(sqlStr, args...)
 		if err != nil {
 			return 0, err
@@ -598,6 +598,7 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 
 		var id int64
 		id, err = res.LastInsertId()
+		session.engine.logger.Warn("[CORE SQL INSERT]last insert id: ", id)
 		if err != nil || id <= 0 {
 			return res.RowsAffected()
 		}
