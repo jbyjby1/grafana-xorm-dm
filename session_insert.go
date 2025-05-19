@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-	"xorm.io/xorm/convert"
+	//"xorm.io/xorm/convert"
 	"xorm.io/builder"
 	"xorm.io/core"
 	"github.com/grafana/grafana/pkg/infra/log"
@@ -670,15 +670,12 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 			return res.RowsAffected()
 		}
 
-		rowsAffected := res.RowsAffected()
-		res, err := session.exec("", args...)
-
 		var id int64
 		id, err = res.LastInsertId()
 		currentLogger.Warn("[CORE SQL INSERT]last insert id A: ", id)
 
 		if id == 0 {
-			queryErr := session.queryRow("SELECT @@IDENTITY", newArgs...).Scan(&id)
+			queryErr := session.queryRow("SELECT @@IDENTITY").Scan(&id)
 			currentLogger.Warn("[CORE SQL INSERT]last insert id B: ", id)
 			if queryErr != nil {
 				session.engine.logger.Errorf("%v", err)
