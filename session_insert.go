@@ -695,8 +695,14 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 		if aiValue == nil || !aiValue.IsValid() || !aiValue.CanSet() {
 			return res.RowsAffected()
 		}
+		
 
+		currentLogger.Warn("[CORE SQL INSERT]aotu increment value A: ", aiValue)
+		currentLogger.Warn("[CORE SQL INSERT]aotu increment value bean A: ", bean)
 		aiValue.Set(int64ToIntValue(id, aiValue.Type()))
+
+		currentLogger.Warn("[CORE SQL INSERT]aotu increment value B: ", aiValue)
+		currentLogger.Warn("[CORE SQL INSERT]aotu increment value bean B: ", bean)
 
 		return res.RowsAffected()
 	} else {
