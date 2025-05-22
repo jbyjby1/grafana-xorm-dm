@@ -678,7 +678,8 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 			queryErr := session.queryRow("SELECT @@IDENTITY").Scan(&id)
 			currentLogger.Warn("[CORE SQL INSERT]last insert id B: ", id)
 			if queryErr != nil {
-				session.engine.logger.Errorf("%v", err)
+				currentLogger.Error("[CORE SQL INSERT]Error for get insert id. ", queryErr)
+				session.engine.logger.Errorf("%v", queryErr)
 				return res.RowsAffected()
 			}
 		}
@@ -686,16 +687,16 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 		if err != nil || id <= 0 {
 			return res.RowsAffected()
 		}
-
+		currentLogger.Warn("[CORE SQL INSERT]Tag2")
 		aiValue, err := table.AutoIncrColumn().ValueOf(bean)
 		if err != nil {
 			session.engine.logger.Error(err)
 		}
-
+		currentLogger.Warn("[CORE SQL INSERT]Tag3")
 		if aiValue == nil || !aiValue.IsValid() || !aiValue.CanSet() {
 			return res.RowsAffected()
 		}
-		
+		currentLogger.Warn("[CORE SQL INSERT]Tag4")
 
 		currentLogger.Warn("[CORE SQL INSERT]aotu increment value A: ", aiValue)
 		currentLogger.Warn("[CORE SQL INSERT]aotu increment value bean A: ", bean)
