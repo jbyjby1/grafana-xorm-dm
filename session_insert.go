@@ -677,11 +677,14 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 		if id == 0 {
 			queryErr := session.queryRow("SELECT @@IDENTITY").Scan(&id)
 			currentLogger.Warn("[CORE SQL INSERT]last insert id B: ", id)
+			currentLogger.Warn("[CORE SQL INSERT]Tag 05271", )
 			if queryErr != nil {
+				currentLogger.Warn("[CORE SQL INSERT]Tag 05272", )
 				currentLogger.Error("[CORE SQL INSERT]Error for get insert id. ", queryErr)
 				session.engine.logger.Errorf("%v", queryErr)
 				return res.RowsAffected()
 			}
+			currentLogger.Warn("[CORE SQL INSERT]Tag 05273", )
 		}
 
 		if err != nil || id <= 0 {
