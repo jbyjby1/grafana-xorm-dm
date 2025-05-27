@@ -681,6 +681,7 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 			if queryErr != nil {
 				currentLogger.Warn("[CORE SQL INSERT]Tag 05272", )
 				currentLogger.Error("[CORE SQL INSERT]Error for get insert id. ", queryErr)
+				currentLogger.Warn("error: ", queryErr)
 				session.engine.logger.Errorf("%v", queryErr)
 				return res.RowsAffected()
 			}
