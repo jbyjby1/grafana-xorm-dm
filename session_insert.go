@@ -678,7 +678,7 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 			queryErr := session.queryRow("SELECT @@IDENTITY").Scan(&id)
 			currentLogger.Warn("[CORE SQL INSERT]last insert id B: ", id)
 			currentLogger.Warn("[CORE SQL INSERT]Tag 05271", )
-			if queryErr != nil {
+			if queryErr != nil || id <= 0 {
 				currentLogger.Warn("[CORE SQL INSERT]Tag 05272", )
 				currentLogger.Error("[CORE SQL INSERT]Error for get insert id. ", queryErr)
 				currentLogger.Warn("error: ", queryErr)
@@ -688,9 +688,9 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 			currentLogger.Warn("[CORE SQL INSERT]Tag 05273", )
 		}
 
-		if err != nil || id <= 0 {
-			return res.RowsAffected()
-		}
+		// if err != nil || id <= 0 {
+		// 	return res.RowsAffected()
+		// }
 		currentLogger.Warn("[CORE SQL INSERT]Tag2")
 		aiValue, err := table.AutoIncrColumn().ValueOf(bean)
 		if err != nil {
@@ -702,12 +702,12 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 		}
 		currentLogger.Warn("[CORE SQL INSERT]Tag4")
 
-		currentLogger.Warn("[CORE SQL INSERT]aotu increment value A: ", aiValue)
-		currentLogger.Warn("[CORE SQL INSERT]aotu increment value bean A: ", bean)
+		currentLogger.Warn("[CORE SQL INSERT]auto increment value A: ", aiValue)
+		currentLogger.Warn("[CORE SQL INSERT]auto increment value bean A: ", bean)
 		aiValue.Set(int64ToIntValue(id, aiValue.Type()))
 
-		currentLogger.Warn("[CORE SQL INSERT]aotu increment value B: ", aiValue)
-		currentLogger.Warn("[CORE SQL INSERT]aotu increment value bean B: ", bean)
+		currentLogger.Warn("[CORE SQL INSERT]auto increment value B: ", aiValue)
+		currentLogger.Warn("[CORE SQL INSERT]auto increment value bean B: ", bean)
 
 		return res.RowsAffected()
 	} else {
