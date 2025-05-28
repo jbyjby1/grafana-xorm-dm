@@ -574,80 +574,7 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 
 		return 1, nil
 	} else if len(table.AutoIncrement) > 0 && session.engine.dialect.DBType() == "odbc" {
-		// for DM DBMS, it didn't implement lastInsertId, so we should
-	    // implemented it ourself.
-		// currentLogger.Warn("[CORE SQL INSERT]Tag1")
-		// var sql string
-		// var newArgs []interface{}
-		// var needCommit bool
-		// var id int64
-		// if session.isAutoCommit { // if it's not in transaction
-		// 	if err := session.Begin(); err != nil {
-		// 		return 0, err
-		// 	}
-		// 	needCommit = true
-		// }
-		// _, err := session.exec(sqlStr, args...)
-		// if err != nil {
-		// 	return 0, err
-		// }
-
-		// i := -1
-		// for j, ss := range colNames {
-		// 	if table.AutoIncrement == ss {
-		// 		i = j
-		// 	}
-		// }
-
-		// // i := utils.IndexSlice(colNames, table.AutoIncrement)
-		// if i > -1 {
-		// 	id, err = convert.AsInt64(args[i])
-		// 	if err != nil {
-		// 		return 0, err
-		// 	}
-		// } else {
-		// 	sql = fmt.Sprintf("select %s.currval from dual", "SEQ_" + strings.ToUpper(tableName))
-		// }
-		// currentLogger.Warn("[CORE SQL INSERT]last insert id A: ", id)
-		// if id == 0 {
-		// 	err := session.queryRow(sql, newArgs...).Scan(&id)
-		// 	if err != nil {
-		// 		return 0, err
-		// 	}
-		// 	if needCommit {
-		// 		if err := session.Commit(); err != nil {
-		// 			return 0, err
-		// 		}
-		// 	}
-		// 	if id == 0 {
-		// 		return 0, errors.New("insert successfully but not returned id")
-		// 	}
-		// }
-		// currentLogger.Warn("[CORE SQL INSERT]last insert id B: ", id)
-
-		// defer handleAfterInsertProcessorFunc(bean)
-
-		// _ = session.cacheInsert(tableName)
-
-		// if table.Version != "" && session.statement.checkVersion {
-		// 	verValue, err := table.VersionColumn().ValueOf(bean)
-		// 	if err != nil {
-		// 		session.engine.logger.Errorf("%v", err)
-		// 	} else if verValue.IsValid() && verValue.CanSet() {
-		// 		session.incrVersionFieldValue(verValue)
-		// 	}
-		// }
-
-		// aiValue, err := table.AutoIncrColumn().ValueOf(bean)
-		// if err != nil {
-		// 	session.engine.logger.Errorf("%v", err)
-		// }
-
-		// if aiValue == nil || !aiValue.IsValid() || !aiValue.CanSet() {
-		// 	return 1, nil
-		// }
-		// return 1, convert.AssignValue(*aiValue, id)
-		currentLogger.Warn("[CORE SQL INSERT]Tag1")
+		currentLogger.Debug("[CORE SQL INSERT]Tag1")
 		res, err := session.exec(sqlStr, args...)
 		if err != nil {
 			return 0, err
@@ -672,42 +599,42 @@ func (session *Session) innerInsert(bean interface{}) (int64, error) {
 
 		var id int64
 		id, err = res.LastInsertId()
-		currentLogger.Warn("[CORE SQL INSERT]last insert id A: ", id)
+		currentLogger.Debug("[CORE SQL INSERT]last insert id A: ", id)
 
 		if id == 0 {
 			queryErr := session.queryRow("SELECT @@IDENTITY").Scan(&id)
-			currentLogger.Warn("[CORE SQL INSERT]last insert id B: ", id)
-			currentLogger.Warn("[CORE SQL INSERT]Tag 05271", )
+			currentLogger.Info("[CORE SQL INSERT]last insert id B: ", id)
+			currentLogger.Debug("[CORE SQL INSERT]Tag 05271", )
 			if queryErr != nil || id <= 0 {
-				currentLogger.Warn("[CORE SQL INSERT]Tag 05272", )
+				currentLogger.Debug("[CORE SQL INSERT]Tag 05272", )
 				currentLogger.Error("[CORE SQL INSERT]Error for get insert id. ", queryErr)
-				currentLogger.Warn("error: ", queryErr)
+				currentLogger.Debug("error: ", queryErr)
 				session.engine.logger.Errorf("%v", queryErr)
 				return res.RowsAffected()
 			}
-			currentLogger.Warn("[CORE SQL INSERT]Tag 05273", )
+			currentLogger.Debug("[CORE SQL INSERT]Tag 05273", )
 		}
 
 		// if err != nil || id <= 0 {
 		// 	return res.RowsAffected()
 		// }
-		currentLogger.Warn("[CORE SQL INSERT]Tag2")
+		currentLogger.Debug("[CORE SQL INSERT]Tag2")
 		aiValue, err := table.AutoIncrColumn().ValueOf(bean)
 		if err != nil {
 			session.engine.logger.Error(err)
 		}
-		currentLogger.Warn("[CORE SQL INSERT]Tag3")
+		currentLogger.Debug("[CORE SQL INSERT]Tag3")
 		if aiValue == nil || !aiValue.IsValid() || !aiValue.CanSet() {
 			return res.RowsAffected()
 		}
-		currentLogger.Warn("[CORE SQL INSERT]Tag4")
+		currentLogger.Debug("[CORE SQL INSERT]Tag4")
 
-		currentLogger.Warn("[CORE SQL INSERT]auto increment value A: ", aiValue)
-		currentLogger.Warn("[CORE SQL INSERT]auto increment value bean A: ", bean)
+		currentLogger.Debug("[CORE SQL INSERT]auto increment value A: ", aiValue)
+		currentLogger.Debug("[CORE SQL INSERT]auto increment value bean A: ", bean)
 		aiValue.Set(int64ToIntValue(id, aiValue.Type()))
 
-		currentLogger.Warn("[CORE SQL INSERT]auto increment value B: ", aiValue)
-		currentLogger.Warn("[CORE SQL INSERT]auto increment value bean B: ", bean)
+		currentLogger.Debug("[CORE SQL INSERT]auto increment value B: ", aiValue)
+		currentLogger.Debug("[CORE SQL INSERT]auto increment value bean B: ", bean)
 
 		return res.RowsAffected()
 	} else {
